@@ -31,7 +31,7 @@ format: `yaw roll pitch tx ty tz`
 
 ### Usage
 
-`har.py [-h][-t] [-m MODEL_FILENAME][-d DATA_DIR] [-s]`
+`har-angles.py [-h][-t] [-m MODEL_FILENAME][-d DATA_DIR] [-s]`
 
 Optional arguments:
 

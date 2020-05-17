@@ -7,7 +7,7 @@ from keras.layers import Masking
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers.core import Dense, Dropout
-import input_data
+import input_data_fp
 import argparse
 np.random.seed(42)
 tf.set_random_seed(42)
@@ -15,15 +15,18 @@ tf.set_random_seed(42)
 sess = tf.Session(graph=tf.get_default_graph())
 K.set_session(sess)
 
-epochs = 500
+epochs = 200
 batch_size = 64
 n_hidden = 256
-n_classes = 3
+n_classes = 6
 
 ACTIONS = {
-    0: 'STILL',
-    1: 'NOD',
-    2: 'SHAKE',
+    0: 'YAW_N',
+    1: 'YAW_P',
+    2: 'PITCH_N',
+    3: 'PITCH_P',
+    4: 'ROLL_N',
+    5: 'ROLL_P',
 }
 
 
@@ -56,38 +59,40 @@ if __name__ == '__main__':
         default='./data',
         help='Directory of data'
     )
+
     parser.add_argument(
-        '-s',
-        '--gen_syn_data',
+        '-c',
+        '--is_continue',
         action="store_true",
-        help='Except for data loaded, generate some new data'
+        help="Load model and train"
     )
 
     args = parser.parse_args()
-    data_set = input_data.read_data_sets(args.data_dir)
+    data_set = input_data_fp.read_data_sets(args.data_dir)
 
-    if args.gen_syn_data:
-        data_set.gen_syn_data(10, 10, 10)
+    print(str(data_set.get_x().__len__()))
+    print(str(data_set.get_x()[0].__len__()))
+    print(str(data_set.get_x()[0][0].__len__()))
+    print(str(data_set.get_y().__len__()))
 
     X_train, Y_train, X_test, Y_test = data_set.train_test_split()
     if args.is_training:
 
-        epochs = 500
-        batch_size = 64
-        n_hidden = 256
-
         timesteps = len(X_train[0])
         input_dim = len(X_train[0][0])
 
-        model = Sequential()
-        model.add(Masking(mask_value=[0, 0, 0], input_shape=(timesteps, input_dim)))
-        model.add(LSTM(n_hidden, input_shape=(timesteps, input_dim)))
-        model.add(Dropout(0.5))
-        model.add(Dense(n_classes, activation='softmax'))
+        if args.is_continue:
+            model = load_model(args.model_filename)
+        else:
+            model = Sequential()
+            model.add(Masking(mask_value=[0]*input_dim, input_shape=(timesteps, input_dim)))
+            model.add(LSTM(n_hidden, input_shape=(timesteps, input_dim)))
+            model.add(Dropout(0.5))
+            model.add(Dense(n_classes, activation='softmax'))
 
-        model.compile(loss='categorical_crossentropy',
-                      optimizer='rmsprop',
-                      metrics=['accuracy'])
+            model.compile(loss='categorical_crossentropy',
+                          optimizer='rmsprop',
+                          metrics=['accuracy'])
 
         model.fit(X_train,
                   Y_train,
