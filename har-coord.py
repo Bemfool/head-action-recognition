@@ -30,9 +30,15 @@ ACTIONS = {
 }
 
 
-def confusion_matrix(Y_true, Y_pred):
-    print(Y_true)
-    print(Y_pred)
+def confusion_matrix(Y_true, Y_pred, tag_test):
+    for i in range(Y_true.__len__()):
+        t = np.argmax(Y_true[i])
+        p = np.argmax(Y_pred[i])
+        if t != p:
+            print("True: ", str(t), " Pred: ", str(p), " - Tag: ", str(tag_test[i]), " *****")
+        else:
+            print("True: ", str(t), " Pred: ", str(p), " - Tag: ", str(tag_test[i]))
+
     Y_true = pd.Series([ACTIONS[y] for y in np.argmax(Y_true, axis=1)])
     Y_pred = pd.Series([ACTIONS[y] for y in np.argmax(Y_pred, axis=1)])
 
@@ -75,7 +81,7 @@ if __name__ == '__main__':
     print(str(data_set.get_x()[0][0].__len__()))
     print(str(data_set.get_y().__len__()))
 
-    X_train, Y_train, X_test, Y_test = data_set.train_test_split()
+    X_train, Y_train, X_test, Y_test, tag_test = data_set.train_test_split()
     if args.is_training:
 
         timesteps = len(X_train[0])
@@ -104,4 +110,4 @@ if __name__ == '__main__':
         model = load_model(args.model_filename)
 
     # Evaluate
-    print(confusion_matrix(Y_test, model.predict(X_test)))
+    print(confusion_matrix(Y_test, model.predict(X_test), tag_test))

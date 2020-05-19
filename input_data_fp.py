@@ -9,6 +9,7 @@ class FpDataSet:
     def __init__(self):
         self.__X = []
         self.__Y = []
+        self.__tag = []
 
     def add_x(self, x):
         self.__X.append(x)
@@ -16,17 +17,24 @@ class FpDataSet:
     def add_y(self, y):
         self.__Y.append(y)
 
+    def add_tag(self, tag):
+        self.__tag.append(tag)
+
     def get_x(self):
         return np.array(self.__X)
 
     def get_y(self):
         return np.array(self.__Y)
 
-    max_seq_length = 60
+    def get_tag(self):
+        return np.array(self.__tag)
+
+    max_seq_length = 75
 
     def train_test_split(self, ratio=0.33, shuffle=True):
         X = np.array([i for i in self.get_x()])
         Y = np.array([i for i in self.get_y()])
+        tag = np.array([i for i in self.get_tag()])
         print(X.__len__())
         print(X[0].__len__())
         print(X[0][0].__len__())
@@ -36,12 +44,14 @@ class FpDataSet:
             np.random.shuffle(idx)
             X = X[idx, :, :]
             Y = Y[idx, :]
+            tag = tag[idx, :]
         train_len = int(len * (1. - ratio))
         X_test = X[train_len:, :, :]
         X_train = X[:train_len, :, :]
         Y_test = Y[train_len:, :]
         Y_train = Y[:train_len, :]
-        return X_train, Y_train, X_test, Y_test
+        tag_test = tag[train_len:, :]
+        return X_train, Y_train, X_test, Y_test, tag_test
 
 
 def read_data_sets(filepath):
@@ -103,5 +113,6 @@ def read_data_sets(filepath):
         print(action_seq.__len__())
         data_set.add_x(action_seq)
         data_set.add_y(y)
+        data_set.add_tag([path])
 
     return data_set
